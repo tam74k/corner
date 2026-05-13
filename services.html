@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدماتنا وأسعارنا | كورنر ووش</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-orange: #ea6420;
+            --dark-black: #1a1a1a;
+            --bg-light: #fef8f5;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-black); line-height: 1.6; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+
+        .page-header { text-align: center; margin-bottom: 30px; }
+        .page-header h1 { color: var(--primary-orange); font-weight: 900; font-size: 2rem; }
+        
+        .back-btn { display: inline-block; background-color: var(--dark-black); color: var(--white); text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; margin-bottom: 20px; transition: 0.3s; }
+        .back-btn:hover { background-color: var(--primary-orange); }
+
+        .services-container { background: var(--white); border-radius: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
+        
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; }
+        th { background-color: var(--primary-orange); color: var(--white); font-weight: 700; }
+        tr:hover { background-color: #fcfcfc; }
+        .price { font-weight: 800; color: var(--primary-orange); white-space: nowrap; font-size: 1.1rem; }
+
+        #loadingMsg { text-align: center; font-weight: bold; color: var(--primary-orange); padding: 20px; font-size: 1.2rem; }
+
+        @media (max-width: 480px) { th, td { padding: 10px; font-size: 0.9rem; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- زر العودة للرئيسية -->
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-right"></i> عودة للرئيسية
+        </a>
+
+        <div class="page-header">
+            <h1><i class="fas fa-tags"></i> قائمة الخدمات والأسعار</h1>
+        </div>
+
+        <section class="services-container">
+            <div id="loadingMsg"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الأسعار...</div>
+            
+            <table id="servicesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>الخدمة</th>
+                        <th>التفاصيل</th>
+                        <th>السعر</th>
+                    </tr>
+                </thead>
+                <tbody id="servicesBody">
+                    <!-- سيتم إضافة البيانات هنا عبر الجافاسكربت -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- كود جلب البيانات من Supabase -->
+    <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // 1. تأكد من إضافة https:// قبل الرابط (تغيير مهم في 2026)
+    const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
+    // 2. استخدم المفتاح الجديد المخصص للنشر (Publishable Key) من لوحة التحكم
+    const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK'; 
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const table = document.getElementById('servicesTable');
+    const tbody = document.getElementById('servicesBody');
+    const loadingMsg = document.getElementById('loadingMsg');
+
+    async function fetchServices() {
+        try {
+            const { data, error } = await supabase
+                .from('services')
+                .select('service_name, service_description, service_price')
+                .order('id', { ascending: true });
+
+            if (error) {
+                // إذا ظهر خطأ 401 أو 403، فهذا يعني أنك بحاجة لتنفيذ خطوة الـ GRANT (انظر الخطوات بالأسفل)
+                throw error;
+            }
+
+            if (!data || data.length === 0) {
+                loadingMsg.innerHTML = 'لا توجد خدمات مضافة حالياً (تأكد من صلاحيات الوصول للجداول).';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(service => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${service.service_name}</strong></td>
+                    <td>${service.service_description}</td>
+                    <td class="price">${service.service_price} ج.م</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            loadingMsg.style.display = 'none';
+            table.style.display = 'table';
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            loadingMsg.innerHTML = `<span style="color:red;">خطأ: ${error.message}</span>`;
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', fetchServices);
+</script>
+</body>
+</html>

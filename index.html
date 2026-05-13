@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مغسلة كورنر ووش | الرئيسية</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-orange: #ea6420;
+            --dark-black: #1a1a1a;
+            --bg-light: #fef8f5;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-black); line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; }
+
+        .header-logo { margin-bottom: 20px; }
+        .header-logo img { max-width: 300px; width: 100%; height: auto; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1)); }
+
+        .about-section { background: var(--white); padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border-top: 4px solid var(--primary-orange); }
+        .about-section h1 { color: var(--primary-orange); font-weight: 900; margin-bottom: 10px; }
+        .about-section p { font-size: 1.1rem; color: #555; }
+
+        .social-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; color: var(--white); background-color: var(--dark-black); padding: 12px 25px; border-radius: 50px; font-weight: 700; font-size: 1rem; transition: all 0.3s ease; flex: 1 1 calc(50% - 15px); min-width: 150px; }
+        .social-btn i { font-size: 1.3rem; }
+        .social-btn:hover { background-color: var(--primary-orange); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(234, 100, 32, 0.4); }
+
+        /* تعديل زر الخدمات ليصبح رابط (Link) */
+        .services-btn { display: inline-block; background-color: var(--primary-orange); color: var(--white); text-decoration: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 8px; transition: all 0.3s ease; width: 100%; margin-bottom: 20px; }
+        .services-btn:hover { background-color: var(--dark-black); }
+
+        footer { background-color: var(--dark-black); color: var(--white); padding: 25px; border-radius: 15px; margin-top: 20px; }
+        footer h3 { color: var(--primary-orange); margin-bottom: 15px; }
+        footer p { margin-bottom: 8px; font-size: 1.1rem; }
+        footer i { color: var(--primary-orange); margin-left: 10px; }
+
+        @media (max-width: 480px) { .social-btn { flex: 1 1 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- الشعار (تم استخدام اسم الصورة المرفقة) -->
+        <header class="header-logo">
+            <img src="images/logo.png" alt="شعار مغسلة كورنر ووش">
+        </header>
+
+        <!-- النبذة -->
+        <section class="about-section">
+            <h1>مغسلة كورنر ووش للسيارات</h1>
+            <p>نقدم لك في <strong>كورنر ووش</strong> العناية الفائقة التي تستحقها سيارتك. نستخدم أفضل المواد وأحدث التقنيات لضمان نظافة ولمعان يدوم طويلاً.</p>
+        </section>
+
+        <!-- أزرار التواصل -->
+        <section class="social-links">
+            <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i> واتساب</a>
+            <a href="#" class="social-btn"><i class="fab fa-instagram"></i> انستجرام</a>
+            <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i> فيسبوك</a>
+            <a href="#" class="social-btn"><i class="fas fa-map-marker-alt"></i> موقعنا</a>
+        </section>
+
+        <!-- زر الذهاب لصفحة الخدمات -->
+        <a href="services.html" class="services-btn">
+            <i class="fas fa-list"></i> عرض خدماتنا وأسعارنا
+        </a>
+
+        <!-- الفوتر -->
+        <footer>
+            <h3>معلومات التواصل</h3>
+            <p><i class="fas fa-phone"></i> 01012029818</p>
+            <p><i class="fas fa-envelope"></i> info@cornerwash.com</p>
+        </footer>
+    </div>
+</body>
+</html>
