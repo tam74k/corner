@@ -11,73 +11,553 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* =========================================
+           1. CSS Variables & Theme
+           ========================================= */
         :root {
             --primary-orange: #ea6420;
-            --dark-black: #1a1a1a;
-            --bg-light: #fef8f5;
-            --white: #ffffff;
+            --primary-glow: rgba(234, 100, 32, 0.4);
+            --dark-bg: #050505;
+            --darker-bg: #000000;
+            --text-light: #f4f4f4;
+            --text-muted: #aaaaaa;
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.03);
         }
 
+        /* =========================================
+           2. Base Reset & Typography
+           ========================================= */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--dark-black); line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--dark-bg); color: var(--text-light); line-height: 1.6; overflow-x: hidden; }
+        h1, h2, h3, h4 { font-weight: 900; }
+        h2 { font-size: 2.5rem; text-align: center; margin-bottom: 3rem; background: linear-gradient(to left, #fff, var(--text-muted)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 
-        .header-logo { margin-bottom: 20px; }
-        .header-logo img { max-width: 300px; width: 100%; height: auto; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1)); }
+        /* =========================================
+           3. Utilities (Glassmorphism, Reveals)
+           ========================================= */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; transition: 0.4s ease; }
+        .text-orange { color: var(--primary-orange); }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .mt-2 { margin-top: 15px; }
+        .mb-4 { margin-bottom: 30px; }
 
-        .about-section { background: var(--white); padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border-top: 4px solid var(--primary-orange); }
-        .about-section h1 { color: var(--primary-orange); font-weight: 900; margin-bottom: 10px; }
-        .about-section p { font-size: 1.1rem; color: #555; }
+        /* Preloader */
+        #preloader { position: fixed; inset: 0; background-color: var(--darker-bg); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease; }
+        .loader { width: 60px; height: 60px; border: 3px solid var(--glass-border); border-top-color: var(--primary-orange); border-radius: 50%; animation: spin 1s linear infinite; box-shadow: 0 0 20px var(--primary-glow); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .social-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        .social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; color: var(--white); background-color: var(--dark-black); padding: 12px 25px; border-radius: 50px; font-weight: 700; font-size: 1rem; transition: all 0.3s ease; flex: 1 1 calc(50% - 15px); min-width: 150px; }
-        .social-btn i { font-size: 1.3rem; }
-        .social-btn:hover { background-color: var(--primary-orange); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(234, 100, 32, 0.4); }
+        /* Floating WhatsApp */
+        .floating-wa { position: fixed; bottom: 30px; left: 30px; background: #25d366; color: #fff; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4); z-index: 1000; transition: 0.3s; text-decoration: none; }
+        .floating-wa:hover { transform: scale(1.1); box-shadow: 0 10px 35px rgba(37, 211, 102, 0.6); }
 
-        /* تعديل زر الخدمات ليصبح رابط (Link) */
-        .services-btn { display: inline-block; background-color: var(--primary-orange); color: var(--white); text-decoration: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 8px; transition: all 0.3s ease; width: 100%; margin-bottom: 20px; }
-        .services-btn:hover { background-color: var(--dark-black); }
+        /* =========================================
+           4. Layout Components
+           ========================================= */
+        /* Header */
+        header { position: absolute; top: 0; left: 0; width: 100%; z-index: 100; padding: 25px 0; display: flex; justify-content: center; }
+        header img { max-width: 220px; filter: drop-shadow(0px 0px 20px rgba(234,100,32,0.4)); animation: fadeInDown 1s ease; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-        footer { background-color: var(--dark-black); color: var(--white); padding: 25px; border-radius: 15px; margin-top: 20px; }
-        footer h3 { color: var(--primary-orange); margin-bottom: 15px; }
-        footer p { margin-bottom: 8px; font-size: 1.1rem; }
-        footer i { color: var(--primary-orange); margin-left: 10px; }
+        /* Hero Section */
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: url('images/bg-luxury.jpg') center/cover no-repeat fixed, url('images/bg-luxury.png') center/cover no-repeat fixed, var(--dark-bg); padding-top: 180px; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, var(--dark-bg) 100%); z-index: 1; }
+        .hero-content { position: relative; z-index: 2; max-width: 900px; display: flex; flex-direction: column; align-items: center; }
+        .hero-content h1 { font-size: 3.8rem; margin-bottom: 20px; text-shadow: 0 5px 15px rgba(0,0,0,0.8); line-height: 1.2; }
+        .hero-content p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px; max-width: 700px; }
+        .hero-car { max-width: 100%; width: 600px; margin-top: -20px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.9)); animation: floatCar 6s ease-in-out infinite; }
+        @keyframes floatCar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-        @media (max-width: 480px) { .social-btn { flex: 1 1 100%; } }
+        /* Buttons */
+        .btn-group { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; width: 100%; }
+        .btn-primary { background: var(--primary-orange); color: #fff; text-decoration: none; padding: 15px 40px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; transition: 0.3s; box-shadow: 0 0 20px var(--primary-glow); border: 1px solid var(--primary-orange); display: inline-flex; align-items: center; gap: 10px; }
+        .btn-primary:hover { background: transparent; box-shadow: 0 0 30px var(--primary-glow); transform: translateY(-3px); }
+        .btn-secondary { background: var(--glass-bg); backdrop-filter: blur(10px); color: #fff; text-decoration: none; padding: 15px 30px; border-radius: 50px; font-weight: 600; transition: 0.3s; border: 1px solid var(--glass-border); display: inline-flex; align-items: center; gap: 10px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--primary-orange); transform: translateY(-3px); color: var(--primary-orange); }
+
+        /* Social Brand Colors */
+        .btn-wa:hover { border-color: #25d366; color: #25d366; box-shadow: 0 5px 15px rgba(37,211,102,0.2); }
+        .btn-fb:hover { border-color: #1877F2; color: #1877F2; box-shadow: 0 5px 15px rgba(24,119,242,0.2); }
+        .btn-ig:hover { border-color: #e1306c; color: #e1306c; box-shadow: 0 5px 15px rgba(225,48,108,0.2); }
+
+        /* Sections General */
+        section { padding: 100px 0; position: relative; }
+
+        /* Services Preview */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .service-card { padding: 40px 30px; text-align: center; position: relative; overflow: hidden; }
+        .service-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent, rgba(234,100,32,0.05), transparent); transform: translateX(-100%); transition: 0.6s; }
+        .service-card:hover::before { transform: translateX(100%); }
+        .service-card:hover { border-color: var(--primary-orange); transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 15px rgba(234,100,32,0.1); }
+        .service-card img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: transform 0.4s ease; background-color: #111; }
+        .service-card:hover img { transform: scale(1.05); }
+        .service-card h3 { font-size: 1.6rem; margin-bottom: 15px; color: var(--primary-orange); }
+
+        /* Why Choose Us */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .feature-item { text-align: center; padding: 30px; }
+        .feature-item i { font-size: 3rem; color: var(--primary-orange); margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
+        .feature-item h3 { font-size: 1.4rem; margin-bottom: 15px; color: #fff; }
+        .feature-item p { color: var(--text-muted); }
+
+        /* Before / After */
+        .ba-container { max-width: 900px; margin: 0 auto; border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .ba-container img { width: 100%; display: block; }
+        .ba-badge { position: absolute; top: 20px; background: rgba(0,0,0,0.8); padding: 8px 25px; border-radius: 30px; font-weight: bold; border: 1px solid var(--glass-border); backdrop-filter: blur(5px); }
+        .ba-badge.before { right: 20px; color: #aaa; }
+        .ba-badge.after { left: 20px; color: var(--primary-orange); border-color: var(--primary-orange); box-shadow: 0 0 15px var(--primary-glow); }
+
+        /* Testimonials */
+        .testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .review-card { padding: 40px; position: relative; }
+        .review-card i.fa-quote-right { position: absolute; top: 30px; left: 30px; font-size: 4rem; color: rgba(255,255,255,0.03); }
+        .stars { color: #FFD700; margin-bottom: 20px; font-size: 1.2rem; }
+        .review-card p { font-size: 1.1rem; font-style: italic; color: #ddd; }
+
+        /* Special Offers */
+        .offer-card { background: linear-gradient(135deg, rgba(234,100,32,0.1) 0%, rgba(0,0,0,0) 100%); border-color: rgba(234,100,32,0.3); text-align: center; padding: 60px 40px; box-shadow: inset 0 0 30px rgba(234,100,32,0.05); }
+        .offer-card h3 { font-size: 2.2rem; color: var(--primary-orange); margin-bottom: 15px; }
+        .offer-card p { font-size: 1.2rem; margin-bottom: 30px; }
+
+        /* Review Modal Styles */
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(8px); justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content { background: var(--dark-bg); padding: 40px; border: 1px solid var(--primary-orange); width: 90%; max-width: 500px; border-radius: 20px; position: relative; box-shadow: 0 0 30px rgba(234,100,32,0.15); transform: scale(0.8); transition: transform 0.3s ease; }
+        .modal.show .modal-content { transform: scale(1); }
+        .close-modal { color: #aaa; position: absolute; top: 15px; left: 20px; font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .close-modal:hover { color: var(--primary-orange); }
+        .modal h3 { color: #fff; margin-bottom: 25px; text-align: center; font-size: 1.8rem; }
+        .review-form input, .review-form select, .review-form textarea { width: 100%; padding: 12px 15px; margin-bottom: 20px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.02); color: #fff; font-size: 1rem; font-family: 'Cairo', sans-serif; transition: 0.3s; }
+        .review-form input:focus, .review-form select:focus, .review-form textarea:focus { outline: none; border-color: var(--primary-orange); box-shadow: 0 0 10px rgba(234,100,32,0.2); background: rgba(255,255,255,0.05); }
+        .review-form select option { background: var(--dark-bg); color: #fff; }
+        .rating-input { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; color: #fff; }
+        .rating-input select { margin-bottom: 0; flex-grow: 1; cursor: pointer; }
+
+        /* CTA Section */
+        .cta-section { text-align: center; padding: 120px 20px; background: url('images/bg-luxury.jpg') center/cover fixed, url('images/bg-luxury.png') center/cover fixed, var(--dark-bg); position: relative; border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); }
+        .cta-section::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, var(--dark-bg), rgba(5,5,5,0.8), var(--dark-bg)); }
+        .cta-content { position: relative; z-index: 2; }
+
+        /* Footer */
+        footer { background: var(--darker-bg); padding: 80px 0 30px; border-top: 1px solid var(--glass-border); }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 50px; margin-bottom: 50px; text-align: right; }
+        .footer-col h4 { color: var(--primary-orange); font-size: 1.4rem; margin-bottom: 25px; position: relative; padding-bottom: 10px; }
+        .footer-col h4::after { content: ''; position: absolute; bottom: 0; right: 0; width: 40px; height: 2px; background: var(--primary-orange); }
+        .footer-col p, .footer-col a { color: var(--text-muted); text-decoration: none; margin-bottom: 15px; display: block; transition: 0.3s; }
+        .footer-col a:hover { color: var(--primary-orange); padding-right: 10px; }
+        .social-icons { display: flex; gap: 15px; margin-top: 25px; }
+        .social-icons a { width: 45px; height: 45px; border-radius: 50%; background: var(--glass-bg); display: flex; justify-content: center; align-items: center; color: #fff; border: 1px solid var(--glass-border); font-size: 1.2rem; transition: 0.3s; }
+        .social-icons a:hover { transform: translateY(-5px); }
+        .social-icons a.social-wa:hover { background: #25d366; border-color: #25d366; box-shadow: 0 5px 15px rgba(37,211,102,0.4); }
+        .social-icons a.social-fb:hover { background: #1877F2; border-color: #1877F2; box-shadow: 0 5px 15px rgba(24,119,242,0.4); }
+        .social-icons a.social-ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border-color: transparent; box-shadow: 0 5px 15px rgba(220,39,67,0.4); }
+        .copyright { border-top: 1px solid var(--glass-border); padding-top: 25px; color: #666; font-size: 1rem; text-align: center; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 2.5rem; }
+            .btn-group { flex-direction: column; width: 100%; }
+            .btn-secondary { justify-content: center; }
+            section { padding: 70px 0; }
+            .ba-badge { font-size: 0.9rem; padding: 5px 15px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- الشعار (تم استخدام اسم الصورة المرفقة) -->
-        <header class="header-logo">
-            <img src="images/logo.png" alt="شعار مغسلة كورنر ووش">
-        </header>
 
-        <!-- النبذة -->
-        <section class="about-section">
-            <h1>مغسلة كورنر ووش للسيارات</h1>
-            <p>نقدم لك في <strong>كورنر ووش</strong> العناية الفائقة التي تستحقها سيارتك. نستخدم أفضل المواد وأحدث التقنيات لضمان نظافة ولمعان يدوم طويلاً.</p>
-        </section>
-
-        <!-- أزرار التواصل -->
-        <section class="social-links">
-            <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i> واتساب</a>
-            <a href="#" class="social-btn"><i class="fab fa-instagram"></i> انستجرام</a>
-            <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i> فيسبوك</a>
-            <a href="#" class="social-btn"><i class="fas fa-map-marker-alt"></i> موقعنا</a>
-        </section>
-
-        <!-- زر الذهاب لصفحة الخدمات -->
-        <a href="services.html" class="services-btn">
-            <i class="fas fa-list"></i> عرض خدماتنا وأسعارنا
-        </a>
-
-        <!-- الفوتر -->
-        <footer>
-            <h3>معلومات التواصل</h3>
-            <p><i class="fas fa-phone"></i> 01012029818</p>
-            <p><i class="fas fa-envelope"></i> info@cornerwash.com</p>
-        </footer>
+    <!-- Loading Animation -->
+    <div id="preloader">
+        <div class="loader"></div>
     </div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/201012029818" target="_blank" class="floating-wa" title="تواصل معنا عبر واتساب">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Navbar / Logo -->
+    <header>
+        <img src="images/logo.png" alt="شعار مغسلة كورنر ووش" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/logo.jpg';}else{this.src='https://via.placeholder.com/220x80?text=Corner+Wash';}">
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content reveal">
+            <h1 class="text-orange">عناية فائقة تليق بسيارتك الفاخرة</h1>
+            <p>نقدم لك في <strong>كورنر ووش</strong> تجربة غسيل سيارات استثنائية باستخدام أحدث التقنيات وأفضل المواد عالمياً للحفاظ على لمعان سيارتك وكأنها جديدة تماماً.</p>
+            
+            <div class="btn-group">
+                <a href="services.html" class="btn-primary"><i class="fas fa-gem"></i> عرض خدماتنا وأسعارنا</a>
+                <a href="https://wa.me/201012029818" target="_blank" class="btn-secondary btn-wa"><i class="fab fa-whatsapp"></i> واتساب</a>
+                <a href="tel:01012029818" class="btn-secondary"><i class="fas fa-phone"></i> اتصال</a>
+                <a href="https://maps.google.com/?q=Corner+Wash" target="_blank" class="btn-secondary"><i class="fas fa-map-marker-alt"></i> موقعنا</a>
+                <a href="https://www.facebook.com/people/Corner-wash/61581482252949/" target="_blank" class="btn-secondary btn-fb"><i class="fab fa-facebook-f"></i> فيسبوك</a>
+                <a href="https://instagram.com" target="_blank" class="btn-secondary btn-ig"><i class="fab fa-instagram"></i> إنستجرام</a>
+            </div>
+
+            <img src="images/hero-car.jpg" alt="سيارة فاخرة" class="hero-car" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/hero-car.png';}else{this.src='https://via.placeholder.com/600x300?text=Hero+Car';}">
+        </div>
+    </section>
+
+    <!-- About Us & Services Preview -->
+    <section class="container" id="about">
+        <h2 class="reveal">من نحن</h2>
+        <p class="reveal" style="text-align: center; max-width: 800px; margin: 0 auto 40px; color: var(--text-muted); font-size: 1.15rem; line-height: 1.8;">
+            <strong>كورنر ووش</strong> هي مغسلة سيارات رائدة متخصصة في تقديم خدمات العناية الفائقة بالسيارات الفارهة والعادية. نعتمد على أحدث التقنيات وأفضل منتجات التنظيف العالمية لضمان حماية طلاء سيارتك وإعادتها لحالتها كالجديدة، معتمدين على فريق احترافي يهتم بأدق التفاصيل.
+        </p>
+        <div class="services-grid">
+            <div class="service-card glass-panel reveal">
+                <img src="images/service-1.jpg" alt="غسيل خارجي" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/service-1.png';}else{this.src='https://via.placeholder.com/300x220?text=Service';}">
+                <h3>غسيل خارجي فاخر</h3>
+                <p>عناية دقيقة بالهيكل الخارجي وإزالة الأوساخ بأمان تام للحفاظ على طبقة الطلاء الأصلية.</p>
+            </div>
+            <div class="service-card glass-panel reveal">
+                <img src="images/service-2.jpg" alt="تنظيف داخلي" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/service-2.png';}else{this.src='https://via.placeholder.com/300x220?text=Service';}">
+                <h3>تنظيف داخلي عميق</h3>
+                <p>تعقيم وتنظيف شامل للمقصورة الداخلية والفرش بأجهزة البخار الحديثة.</p>
+            </div>
+            <div class="service-card glass-panel reveal">
+                <img src="images/service-3.jpg" alt="تلميع" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/service-3.png';}else{this.src='https://via.placeholder.com/300x220?text=Service';}">
+                <h3>تلميع وحماية</h3>
+                <p>إعادة اللمعان الأصلي وتطبيق طبقات الحماية النانو سيراميك الفائقة.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="container">
+        <h2 class="reveal">لماذا تختار كورنر ووش؟</h2>
+        <div class="features-grid">
+            <div class="feature-item glass-panel reveal">
+                <i class="fas fa-shield-halved"></i>
+                <h3>مواد آمنة ومعتمدة</h3>
+                <p>نستخدم منتجات خالية من المواد الكيميائية الضارة ومخصصة للسيارات الفارهة.</p>
+            </div>
+            <div class="feature-item glass-panel reveal">
+                <i class="fas fa-stopwatch"></i>
+                <h3>سرعة ودقة</h3>
+                <p>وقت أقل وجودة أعلى بفضل فريقنا المدرب على أعلى المستويات الاحترافية.</p>
+            </div>
+            <div class="feature-item glass-panel reveal">
+                <i class="fas fa-crown"></i>
+                <h3>خدمة VIP متكاملة</h3>
+                <p>اهتمام بالتفاصيل الدقيقة لضمان تجربة رفاهية كاملة لك ولسيارتك.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Before / After -->
+    <section class="container">
+        <h2 class="reveal">النتائج تتحدث عن نفسها</h2>
+        <div class="ba-container reveal">
+            <span class="ba-badge before">قبل الغسيل</span>
+            <span class="ba-badge after"><i class="fas fa-sparkles"></i> بعد كورنر ووش</span>
+            <img src="images/before-after.jpg" alt="قبل وبعد غسيل السيارة" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/before-after.png';}else{this.src='https://via.placeholder.com/900x450?text=Before+and+After';}">
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="container">
+        <h2 class="reveal">آراء عملائنا المميزين</h2>
+        <div class="testimonials">
+            <div class="review-card glass-panel reveal">
+                <i class="fas fa-quote-right"></i>
+                <div class="stars">★★★★★</div>
+                <p>"تجربة مذهلة بكل المقاييس! سيارتي عادت وكأنها خرجت للتو من الوكالة. الاهتمام بالتفاصيل غير مسبوق، أنصح الجميع بتجربة كورنر ووش."</p>
+                <h4 class="text-orange mt-2">- أحمد محمود</h4>
+            </div>
+            <div class="review-card glass-panel reveal">
+                <i class="fas fa-quote-right"></i>
+                <div class="stars">★★★★★</div>
+                <p>"احترافية عالية في التعامل واستقبال راقي جداً. من أفضل المغاسل التي تعاملت معها، منتجاتهم فعلاً تحافظ على طلاء السيارة."</p>
+                <h4 class="text-orange mt-2">- خالد عبدالله</h4>
+            </div>
+        </div>
+        
+        <!-- Add Review Button -->
+        <div style="text-align: center; margin-top: 40px;" class="reveal">
+            <button id="addReviewBtn" class="btn-primary"><i class="fas fa-pen"></i> أضف رأيك</button>
+        </div>
+
+        <!-- Show All Reviews Button -->
+        <div id="showAllContainer" style="text-align: center; margin-top: 20px; display: none;" class="reveal">
+            <button id="showAllReviewsBtn" class="btn-secondary"><i class="fas fa-list"></i> عرض جميع التقييمات</button>
+        </div>
+    </section>
+
+    <!-- Special Offers -->
+    <section class="container mb-4">
+        <div class="offer-card glass-panel reveal">
+            <h3><i class="fas fa-gift"></i> باقات وعروض حصرية</h3>
+            <p>احصل على خصم 20% على باقة العناية الشاملة عند حجزك الأول معنا.</p>
+            <a href="services.html" class="btn-primary mt-2">استعرض الباقات المتاحة</a>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content container reveal">
+            <h2>جاهز لمنح سيارتك العناية التي تستحقها؟</h2>
+            <a href="https://wa.me/201012029818" target="_blank" class="btn-primary"><i class="far fa-calendar-check"></i> احجز موعدك الآن عبر واتساب</a>
+        </div>
+    </section>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fas fa-star text-orange"></i> شاركنا رأيك</h3>
+            <form id="reviewForm" class="review-form" onsubmit="event.preventDefault();">
+                <input type="text" id="reviewerName" placeholder="الاسم الكريم" required>
+                <div class="rating-input">
+                    <span>التقييم: </span>
+                    <select id="reviewRating">
+                        <option value="5">★★★★★ ممتاز</option>
+                        <option value="4">★★★★☆ جيد جداً</option>
+                        <option value="3">★★★☆☆ جيد</option>
+                        <option value="2">★★☆☆☆ مقبول</option>
+                        <option value="1">★☆☆☆☆ سيء</option>
+                    </select>
+                </div>
+                <textarea id="reviewText" rows="4" placeholder="اكتب تفاصيل تجربتك معنا هنا..." required></textarea>
+                <div id="formMessage" style="display: none; margin-bottom: 15px; text-align: center; border-radius: 8px; padding: 10px; font-weight: bold;"></div>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">إرسال التقييم</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col reveal">
+                <img src="images/logo.png" alt="شعار كورنر ووش" style="max-width: 180px; margin-bottom: 20px;" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/logo.jpg';}else{this.src='https://via.placeholder.com/180x60?text=Corner+Wash';}">
+                    <p>المغسلة الأفضل لتقديم خدمات العناية بالسيارات الفارهة والعادية بأحدث التقنيات ومواد التنظيف العالمية لضمان أعلى مستويات الجودة.</p>
+                </div>
+                <div class="footer-col reveal">
+                    <h4>روابط سريعة</h4>
+                    <a href="index.html"><i class="fas fa-angle-left"></i> الرئيسية</a>
+                    <a href="services.html"><i class="fas fa-angle-left"></i> خدماتنا وأسعارنا</a>
+                    <a href="#about"><i class="fas fa-angle-left"></i> من نحن</a>
+                </div>
+                <div class="footer-col reveal">
+                    <h4>تواصل معنا</h4>
+                    <p><i class="fas fa-phone text-orange"></i> 01012029818</p>
+                    <p><i class="fas fa-envelope text-orange"></i> cornerwash77@gmail.com</p>
+                    <div class="social-icons">
+                        <a href="https://wa.me/201012029818" target="_blank" class="social-wa"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://instagram.com" target="_blank" class="social-ig"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/people/Corner-wash/61581482252949/" target="_blank" class="social-fb"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright reveal">
+                &copy; 2024 كورنر ووش للسيارات. جميع الحقوق محفوظة.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Interactions -->
+    <script>
+        // Preloader FadeOut
+        const hidePreloader = () => {
+            const preloader = document.getElementById('preloader');
+            if (preloader && preloader.style.display !== 'none') {
+                preloader.style.opacity = '0';
+                setTimeout(() => preloader.style.display = 'none', 600);
+            }
+        };
+        
+        window.addEventListener('load', hidePreloader);
+        // Fallback: إخفاء شاشة التحميل إجبارياً بعد 3 ثوانٍ لتجنب التعليق في حال فشل تحميل أي مورد خارجي
+        setTimeout(hidePreloader, 3000); 
+
+        // Scroll Reveal Animations
+        const revealOnScroll = () => {
+            const reveals = document.querySelectorAll('.reveal');
+            const windowHeight = window.innerHeight;
+            reveals.forEach(reveal => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 50) {
+                    reveal.classList.add('active');
+                }
+            });
+        };
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Trigger initially
+    </script>
+
+    <!-- Supabase Reviews Logic -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
+        const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK'; 
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const testimonialsContainer = document.querySelector('.testimonials');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewModal = document.getElementById('reviewModal');
+        const showAllContainer = document.getElementById('showAllContainer');
+        const showAllReviewsBtn = document.getElementById('showAllReviewsBtn');
+        const addReviewBtn = document.getElementById('addReviewBtn');
+        const closeModal = document.querySelector('.close-modal');
+
+        // دالة لإخفاء النافذة ومسح محتوى النموذج تلقائياً
+        const hideModalAndReset = () => {
+            if(reviewModal) reviewModal.classList.remove('show');
+            if(reviewForm) reviewForm.reset();
+            const msg = document.getElementById('formMessage');
+            if (msg) msg.style.display = 'none';
+        };
+
+        if (addReviewBtn) {
+            addReviewBtn.addEventListener('click', () => {
+                if(reviewModal) reviewModal.classList.add('show');
+            });
+        }
+        if (closeModal) {
+            closeModal.addEventListener('click', hideModalAndReset);
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === reviewModal) hideModalAndReset();
+        });
+
+        // 1. جلب التقييمات من قاعدة البيانات
+        async function fetchReviews(fetchAll = false) {
+            try {
+                // First, get the total count to decide about the button
+                const { count, error: countError } = await supabase.from('reviews').select('*', { count: 'exact', head: true });
+                if (countError) throw countError;
+
+                let query = supabase
+                    .from('reviews')
+                    .select('reviewer_name, rating, review_text')
+                    .order('id', { ascending: false });
+
+                if (!fetchAll) {
+                    query = query.limit(4);
+                }
+
+                const { data, error } = await query;
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    testimonialsContainer.innerHTML = ''; // مسح التقييمات الافتراضية
+                    data.forEach(review => {
+                        // رسم النجوم بناءً على التقييم
+                        let starsHtml = '';
+                        for(let i=1; i<=5; i++) {
+                            starsHtml += i <= review.rating ? '★' : '☆';
+                        }
+
+                        // إنشاء العناصر بأمان لتجنب XSS
+                        const card = document.createElement('div');
+                        card.className = 'review-card glass-panel reveal active';
+
+                        const quoteIcon = document.createElement('i');
+                        quoteIcon.className = 'fas fa-quote-right';
+
+                        const starsDiv = document.createElement('div');
+                        starsDiv.className = 'stars';
+                        starsDiv.innerHTML = starsHtml; // Stars are safe, generated by our code
+
+                        const reviewParagraph = document.createElement('p');
+                        reviewParagraph.textContent = `"${review.review_text}"`; // Use textContent for safety
+
+                        const reviewerName = document.createElement('h4');
+                        reviewerName.className = 'text-orange mt-2';
+                        reviewerName.textContent = `- ${review.reviewer_name}`; // Use textContent for safety
+
+                        card.append(quoteIcon, starsDiv, reviewParagraph, reviewerName);
+                        testimonialsContainer.appendChild(card);
+                    });
+                }
+
+                // Logic for "Show All" button visibility
+                if (showAllContainer) {
+                    if (count > 4 && !fetchAll) {
+                        showAllContainer.style.display = 'block';
+                    } else {
+                        showAllContainer.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching reviews:', error);
+                if (showAllContainer) showAllContainer.style.display = 'none';
+            }
+        }
+
+        // جلب التقييمات فور تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchReviews(false);
+        });
+
+        if (showAllReviewsBtn) {
+            showAllReviewsBtn.addEventListener('click', () => fetchReviews(true));
+        }
+
+        // 2. إرسال تقييم جديد لقاعدة البيانات
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('reviewerName').value.trim();
+                const rating = document.getElementById('reviewRating').value;
+                const text = document.getElementById('reviewText').value.trim();
+                const submitBtn = reviewForm.querySelector('button[type="submit"]');
+                const formMessage = document.getElementById('formMessage');
+                
+                formMessage.style.display = 'none';
+
+                // التحقق من أن الحقول ليست فارغة أو مسافات فقط
+                if (!name || !text) {
+                    formMessage.textContent = 'يرجى إدخال البيانات بشكل صحيح لتسجيل رأيك.';
+                    formMessage.style.color = '#ff4d4d';
+                    formMessage.style.display = 'block';
+                    return;
+                }
+
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+                submitBtn.disabled = true;
+
+                try {
+                    const { error } = await supabase
+                        .from('reviews')
+                        .insert([
+                            { reviewer_name: name, rating: parseInt(rating), review_text: text }
+                        ]);
+
+                    if (error) throw error;
+
+                    formMessage.textContent = 'شكراً لك! تم استلام تقييمك بنجاح.';
+                    formMessage.style.color = '#25d366';
+                    formMessage.style.display = 'block';
+                    
+                    // تحديث التقييمات تلقائياً لعرض التقييم الجديد
+                    fetchReviews(false);
+                    
+                    // إغلاق النافذة تلقائياً بعد الإرسال الناجح بثانيتين
+                    setTimeout(() => {
+                        hideModalAndReset();
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Error submitting review:', error);
+                    formMessage.textContent = 'عذراً، حدث خطأ أثناء الإرسال. يرجى المحاولة لاحقاً.';
+                    formMessage.style.color = '#ff4d4d';
+                    formMessage.style.display = 'block';
+                } finally {
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+    </script>
 </body>
 </html>
