@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد | كورنر ووش</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-orange: #ea6420;
+            --dark-black: #1a1a1a;
+            --bg-light: #fef8f5;
+            --white: #ffffff;
+            --gray-border: #cccccc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-black); line-height: 1.6; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+
+        .back-btn { display: inline-block; background-color: var(--dark-black); color: var(--white); text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; margin-bottom: 20px; transition: 0.3s; }
+        .back-btn:hover { background-color: var(--primary-orange); }
+
+        .form-container { background: var(--white); border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-orange); }
+        .form-container h1 { color: var(--primary-orange); font-weight: 900; font-size: 1.8rem; text-align: center; margin-bottom: 25px; }
+
+        .form-group { margin-bottom: 20px; text-align: right; }
+        .form-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--dark-black); }
+        .form-group label span { color: red; } /* النجمة الحمراء للحقول الإجبارية */
+        .form-group small { display: block; color: #666; font-size: 0.85rem; margin-top: -4px; margin-bottom: 6px; }
+
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--gray-border); border-radius: 8px; font-size: 1rem; color: var(--dark-black); transition: 0.3s; }
+        .form-control:focus { outline: none; border-color: var(--primary-orange); box-shadow: 0 0 5px rgba(234, 100, 32, 0.2); }
+
+        /* تنسيق حقول الوقت لتكون بجانب بعضها (من - إلى) */
+        .time-range { display: flex; gap: 15px; }
+        .time-range div { flex: 1; }
+
+        .submit-btn { background-color: var(--primary-orange); color: var(--white); border: none; padding: 15px; font-size: 1.2rem; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; }
+        .submit-btn:hover { background-color: var(--dark-black); }
+        .submit-btn:disabled { background-color: #aaa; cursor: not-allowed; }
+
+        /* رسالة النجاح والخطأ */
+        .alert { display: none; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; text-align: center; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-right"></i> عودة للرئيسية
+        </a>
+
+        <div class="form-container">
+            <h1><i class="fas fa-calendar-check"></i> طلب حجز موعد جديد</h1>
+            
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="customerName">اسم العميل <span>*</span></label>
+                    <input type="text" id="customerName" class="form-control" placeholder="أدخل اسمك الثلاثي" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneNumber">رقم الموبايل <span>*</span></label>
+                    <input type="tel" id="phoneNumber" class="form-control" placeholder="مثال: 0500000000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="carType">نوع السيارة <span>*</span></label>
+                    <input type="text" id="carType" class="form-control" placeholder="مثال: تويوتا كامري، كامسس جيب.." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bookingDate">تاريخ الحجز <span>*</span></label>
+                    <small><i class="fas fa-info-circle"></i> يرجى اختيار تاريخ قادم (اليوم أو الأيام التالية)</small>
+                    <input type="date" id="bookingDate" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>الوقت المناسب للحضور <span>*</span></label>
+                    <small><i class="fas fa-clock"></i> حدد الفترة الزمنية المفضلة لديك</small>
+                    <div class="time-range">
+                        <div>
+                            <label style="font-size: 0.9rem; font-weight: normal;">من الساعة:</label>
+                            <input type="time" id="timeFrom" class="form-control" required>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.9rem; font-weight: normal;">إلى الساعة:</label>
+                            <input type="time" id="timeTo" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="submit-btn">تأكيد الحجز</button>
+            </form>
+
+            <div id="successAlert" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> تم ارسال طلب الحجز وسيتم التواصل معكم في اقرب وقت.
+            </div>
+            <div id="errorAlert" class="alert alert-error"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        // ===== ضع بيانات حساب Supabase الخاص بك هنا =====
+        const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
+    const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK';
+        // ===============================================
+
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const form = document.getElementById('bookingForm');
+        const dateInput = document.getElementById('bookingDate');
+        const submitBtn = document.getElementById('submitBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        // كود برمجي لمنع العميل تلقائياً من اختيار تاريخ قديم في المتصفح
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+
+        // معالجة إرسال النموذج
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // منع إعادة تحميل الصفحة الافتراضي
+            
+            // إخفاء التنبيهات السابقة وتأمين الزر
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'جاري إرسال الطلب...';
+
+            // جلب القيم من المدخلات
+            const customerName = document.getElementById('customerName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const carType = document.getElementById('carType').value;
+            const bookingDate = dateInput.value;
+            const timeFrom = document.getElementById('timeFrom').value;
+            const timeTo = document.getElementById('timeTo').value;
+
+            try {
+                // إرسال البيانات إلى جدول bookings في Supabase
+                const { error } = await supabase
+                    .from('bookings')
+                    .insert([
+                        { 
+                            customer_name: customerName, 
+                            phone_number: phoneNumber, 
+                            car_type: carType, 
+                            booking_date: bookingDate, 
+                            time_from: timeFrom, 
+                            time_to: timeTo 
+                        }
+                    ]);
+
+                if (error) throw error;
+
+                // إذا نجحت العملية، اظهر رسالة النجاح وأعد تعيين النموذج
+                successAlert.style.display = 'block';
+                form.reset();
+                
+                // إعادة ضبط الحد الأدنى للتاريخ مجدداً بعد تفريغ الفورم
+                dateInput.setAttribute('min', today);
+
+            } catch (error) {
+                console.error('Error inserting data:', error);
+                errorAlert.innerText = 'حدث خطأ أثناء إرسال طلبك. يرجى التحقق من الاتصال وإعادة المحاولة.';
+                errorAlert.style.display = 'block';
+            } finally {
+                // إعادة تفعيل زر التأكيد
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'تأكيد الحجز';
+            }
+        });
+    </script>
+</body>
+</html>
