@@ -31,21 +31,17 @@
 
         .form-group { margin-bottom: 20px; text-align: right; }
         .form-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--dark-black); }
-        .form-group label span { color: red; } /* النجمة الحمراء للحقول الإجبارية */
+        .form-group label span { color: red; } 
         .form-group small { display: block; color: #666; font-size: 0.85rem; margin-top: -4px; margin-bottom: 6px; }
 
-        .form-control { width: 100%; padding: 12px; border: 1px solid var(--gray-border); border-radius: 8px; font-size: 1rem; color: var(--dark-black); transition: 0.3s; }
+        /* تعديل تصميم قائمة الاختيار Select */
+        .form-control, select.form-control { width: 100%; padding: 12px; border: 1px solid var(--gray-border); border-radius: 8px; font-size: 1rem; color: var(--dark-black); transition: 0.3s; background-color: var(--white); cursor: pointer; }
         .form-control:focus { outline: none; border-color: var(--primary-orange); box-shadow: 0 0 5px rgba(234, 100, 32, 0.2); }
-
-        /* تنسيق حقول الوقت لتكون بجانب بعضها (من - إلى) */
-        .time-range { display: flex; gap: 15px; }
-        .time-range div { flex: 1; }
 
         .submit-btn { background-color: var(--primary-orange); color: var(--white); border: none; padding: 15px; font-size: 1.2rem; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; }
         .submit-btn:hover { background-color: var(--dark-black); }
         .submit-btn:disabled { background-color: #aaa; cursor: not-allowed; }
 
-        /* رسالة النجاح والخطأ */
         .alert { display: none; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; text-align: center; }
         .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -74,7 +70,7 @@
 
                 <div class="form-group">
                     <label for="carType">نوع السيارة <span>*</span></label>
-                    <input type="text" id="carType" class="form-control" placeholder="مثال: تويوتا كامري، كامسس جيب.." required>
+                    <input type="text" id="carType" class="form-control" placeholder="مثال: تويوتا كامري، جيب لاندكروزر.." required>
                 </div>
 
                 <div class="form-group">
@@ -84,18 +80,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label>الوقت المناسب للحضور <span>*</span></label>
-                    <small><i class="fas fa-clock"></i> حدد الفترة الزمنية المفضلة لديك</small>
-                    <div class="time-range">
-                        <div>
-                            <label style="font-size: 0.9rem; font-weight: normal;">من الساعة:</label>
-                            <input type="time" id="timeFrom" class="form-control" required>
-                        </div>
-                        <div>
-                            <label style="font-size: 0.9rem; font-weight: normal;">إلى الساعة:</label>
-                            <input type="time" id="timeTo" class="form-control" required>
-                        </div>
-                    </div>
+                    <label for="timeSlot">الوقت المناسب للحضور <span>*</span></label>
+                    <small><i class="fas fa-clock"></i> اختر الفترة الزمنية المفضلة لديك</small>
+                    <select id="timeSlot" class="form-control" required>
+                        <option value="" disabled selected>اختر الفترة الزمنية...</option>
+                        <option value="12:00-14:00">من الساعة 12:00 ظهراً إلى الساعة 2:00 مساءً</option>
+                        <option value="14:00-16:00">من الساعة 2:00 مساءً إلى الساعة 4:00 مساءً</option>
+                        <option value="16:00-18:00">من الساعة 4:00 مساءً إلى الساعة 6:00 مساءً</option>
+                        <option value="18:00-20:00">من الساعة 6:00 مساءً إلى الساعة 8:00 مساءً</option>
+                        <option value="20:00-22:00">من الساعة 8:00 مساءً إلى الساعة 10:00 مساءً</option>
+                        <option value="22:00-23:59">من الساعة 10:00 مساءً إلى الساعة 12:00 صباحاً</option>
+                    </select>
                 </div>
 
                 <button type="submit" id="submitBtn" class="submit-btn">تأكيد الحجز</button>
@@ -112,8 +107,9 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         // ===== ضع بيانات حساب Supabase الخاص بك هنا =====
-        const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
-    const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK';
+         const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
+    const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK'; 
+
         // ===============================================
 
         const supabase = createClient(supabaseUrl, supabaseKey);
@@ -124,15 +120,14 @@
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
 
-        // كود برمجي لمنع العميل تلقائياً من اختيار تاريخ قديم في المتصفح
+        // كود برمجي لمنع العميل من اختيار تاريخ قديم
         const today = new Date().toISOString().split('T')[0];
         dateInput.setAttribute('min', today);
 
         // معالجة إرسال النموذج
         form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // منع إعادة تحميل الصفحة الافتراضي
+            e.preventDefault();
             
-            // إخفاء التنبيهات السابقة وتأمين الزر
             successAlert.style.display = 'none';
             errorAlert.style.display = 'none';
             submitBtn.disabled = true;
@@ -143,11 +138,13 @@
             const phoneNumber = document.getElementById('phoneNumber').value;
             const carType = document.getElementById('carType').value;
             const bookingDate = dateInput.value;
-            const timeFrom = document.getElementById('timeFrom').value;
-            const timeTo = document.getElementById('timeTo').value;
+            
+            // جلب القيمة من القائمة المنسدلة وفصلها إلى (من) و (إلى)
+            const timeSlot = document.getElementById('timeSlot').value;
+            const [timeFrom, timeTo] = timeSlot.split('-'); // فصل النص من علامة (-)
 
             try {
-                // إرسال البيانات إلى جدول bookings في Supabase
+                // إرسال البيانات إلى جدول bookings
                 const { error } = await supabase
                     .from('bookings')
                     .insert([
@@ -163,11 +160,9 @@
 
                 if (error) throw error;
 
-                // إذا نجحت العملية، اظهر رسالة النجاح وأعد تعيين النموذج
+                // إظهار رسالة النجاح وتفريغ الحقول
                 successAlert.style.display = 'block';
                 form.reset();
-                
-                // إعادة ضبط الحد الأدنى للتاريخ مجدداً بعد تفريغ الفورم
                 dateInput.setAttribute('min', today);
 
             } catch (error) {
@@ -175,7 +170,6 @@
                 errorAlert.innerText = 'حدث خطأ أثناء إرسال طلبك. يرجى التحقق من الاتصال وإعادة المحاولة.';
                 errorAlert.style.display = 'block';
             } finally {
-                // إعادة تفعيل زر التأكيد
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'تأكيد الحجز';
             }
