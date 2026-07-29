@@ -4,176 +4,237 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حجز موعد | كورنر ووش</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- استدعاء Supabase بالطريقة الكلاسيكية التي لا تسبب أخطاء في الملفات المحلية -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root {
-            --primary-orange: #ea6420;
-            --dark-black: #1a1a1a;
-            --bg-light: #fef8f5;
-            --white: #ffffff;
-            --gray-border: #cccccc;
-        }
-
+        :root { --primary-orange: #ea6420; --dark-black: #1a1a1a; --bg-light: #fef8f5; --white: #ffffff; --gray: #e0e0e0; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--dark-black); line-height: 1.6; padding: 20px; }
+        body { background-color: var(--bg-light); color: var(--dark-black); padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-
-        .back-btn { display: inline-block; background-color: var(--dark-black); color: var(--white); text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; margin-bottom: 20px; transition: 0.3s; }
-        .back-btn:hover { background-color: var(--primary-orange); }
-
+        .back-btn { display: inline-block; background-color: var(--dark-black); color: var(--white); text-decoration: none; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
         .form-container { background: var(--white); border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--primary-orange); }
-        .form-container h1 { color: var(--primary-orange); font-weight: 900; font-size: 1.8rem; text-align: center; margin-bottom: 25px; }
-
+        .form-container h1 { color: var(--primary-orange); text-align: center; margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; text-align: right; }
-        .form-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--dark-black); }
-        .form-group label span { color: red; } 
-        .form-group small { display: block; color: #666; font-size: 0.85rem; margin-top: -4px; margin-bottom: 6px; }
-
-        /* تعديل تصميم قائمة الاختيار Select */
-        .form-control, select.form-control { width: 100%; padding: 12px; border: 1px solid var(--gray-border); border-radius: 8px; font-size: 1rem; color: var(--dark-black); transition: 0.3s; background-color: var(--white); cursor: pointer; }
-        .form-control:focus { outline: none; border-color: var(--primary-orange); box-shadow: 0 0 5px rgba(234, 100, 32, 0.2); }
-
-        .submit-btn { background-color: var(--primary-orange); color: var(--white); border: none; padding: 15px; font-size: 1.2rem; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px; }
-        .submit-btn:hover { background-color: var(--dark-black); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--gray); border-radius: 8px; font-size: 1rem; }
+        .form-control:focus { outline: none; border-color: var(--primary-orange); }
+        
+        #timeSection { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--gray); }
+        .times-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
+        .time-box { background-color: var(--white); border: 2px solid var(--gray); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-weight: 700; transition: 0.3s; }
+        .time-box:hover:not(.disabled) { border-color: var(--primary-orange); color: var(--primary-orange); }
+        .time-box.selected { background-color: var(--primary-orange); color: var(--white); border-color: var(--primary-orange); }
+        .time-box.disabled { background-color: #f5f5f5; color: #aaa; border-color: #eee; cursor: not-allowed; text-decoration: line-through; }
+        
+        .loading { text-align: center; display: none; color: var(--primary-orange); font-weight: bold; margin-bottom: 10px; }
+        .submit-btn { background-color: var(--primary-orange); color: var(--white); border: none; padding: 15px; font-size: 1.2rem; font-weight: 800; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; }
         .submit-btn:disabled { background-color: #aaa; cursor: not-allowed; }
-
-        .alert { display: none; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; text-align: center; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert { display: none; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; font-weight: bold; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <a href="index.html" class="back-btn">
-            <i class="fas fa-arrow-right"></i> عودة للرئيسية
-        </a>
-
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i> عودة للرئيسية</a>
         <div class="form-container">
-            <h1><i class="fas fa-calendar-check"></i> طلب حجز موعد جديد</h1>
-            
+            <h1><i class="fas fa-calendar-check"></i> طلب حجز موعد</h1>
             <form id="bookingForm">
                 <div class="form-group">
-                    <label for="customerName">اسم العميل <span>*</span></label>
-                    <input type="text" id="customerName" class="form-control" placeholder="أدخل اسمك الثلاثي" required>
+                    <label>الاسم <span>*</span></label>
+                    <input type="text" id="customerName" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="phoneNumber">رقم الموبايل <span>*</span></label>
-                    <input type="tel" id="phoneNumber" class="form-control" placeholder="مثال: 01000000000" required>
+                    <label>رقم الموبايل <span>*</span></label>
+                    <input type="tel" id="phoneNumber" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="carType">نوع السيارة <span>*</span></label>
-                    <input type="text" id="carType" class="form-control" placeholder="مثال: تويوتا كامري، جيب لاندكروزر.." required>
+                    <label>نوع السيارة <span>*</span></label>
+                    <input type="text" id="carType" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="bookingDate">تاريخ الحجز <span>*</span></label>
-                    <small><i class="fas fa-info-circle"></i> يرجى اختيار تاريخ قادم (اليوم أو الأيام التالية)</small>
+                    <label>تاريخ الحجز <span>*</span></label>
+                    <small>الرجاء اختيار التاريخ لعرض المواعيد المتاحة</small>
+                    <!-- حقل التاريخ -->
                     <input type="date" id="bookingDate" class="form-control" required>
                 </div>
-
-                <div class="form-group">
-                    <label for="timeSlot">الوقت المناسب للحضور <span>*</span></label>
-                    <small><i class="fas fa-clock"></i> اختر الفترة الزمنية المفضلة لديك</small>
-                    <select id="timeSlot" class="form-control" required>
-                        <option value="" disabled selected>اختر الفترة الزمنية...</option>
-                        <option value="12:00-14:00">من الساعة 12:00 ظهراً إلى الساعة 2:00 مساءً</option>
-                        <option value="14:00-16:00">من الساعة 2:00 مساءً إلى الساعة 4:00 مساءً</option>
-                        <option value="16:00-18:00">من الساعة 4:00 مساءً إلى الساعة 6:00 مساءً</option>
-                        <option value="18:00-20:00">من الساعة 6:00 مساءً إلى الساعة 8:00 مساءً</option>
-                        <option value="20:00-22:00">من الساعة 8:00 مساءً إلى الساعة 10:00 مساءً</option>
-                        <option value="22:00-23:59">من الساعة 10:00 مساءً إلى الساعة 12:00 صباحاً</option>
-                        <option value="00:00-02:59">من الساعة 12:00 منتصف الليل إلى الساعة 2:00 صباحاً</option>
-                    </select>
+                
+                <div id="timeSection">
+                    <div class="form-group">
+                        <label>اختر وقت الحضور <span>*</span></label>
+                        <div id="loadingTimes" class="loading"><i class="fas fa-spinner fa-spin"></i> جاري فحص المواعيد المتاحة...</div>
+                        <div id="timesGrid" class="times-grid"></div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="submit-btn" disabled>تأكيد الحجز</button>
                 </div>
-
-                <button type="submit" id="submitBtn" class="submit-btn">تأكيد الحجز</button>
             </form>
-
-            <div id="successAlert" class="alert alert-success">
-                <i class="fas fa-check-circle"></i> تم ارسال طلب الحجز وسيتم التواصل معكم في اقرب وقت.
-            </div>
+            <div id="successAlert" class="alert alert-success">تم ارسال طلب الحجز وسيتم التواصل معكم قريباً.</div>
             <div id="errorAlert" class="alert alert-error"></div>
         </div>
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-        // ===== ضع بيانات حساب Supabase الخاص بك هنا =====
-         const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
-    const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK'; 
-
-        // ===============================================
-
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
-        const form = document.getElementById('bookingForm');
+    <!-- كود الجافاسكريبت -->
+    <script>
+        // ==========================================
+        // 1. واجهة المستخدم والتاريخ (يعمل فوراً)
+        // ==========================================
         const dateInput = document.getElementById('bookingDate');
+        const timeSection = document.getElementById('timeSection');
+        const timesGrid = document.getElementById('timesGrid');
         const submitBtn = document.getElementById('submitBtn');
-        const successAlert = document.getElementById('successAlert');
+        const loadingTimes = document.getElementById('loadingTimes');
         const errorAlert = document.getElementById('errorAlert');
+        let selectedTime = null;
 
-        // كود برمجي لمنع العميل من اختيار تاريخ قديم
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.setAttribute('min', today);
+        // حساب تاريخ اليوم وصيغته بدقة
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+        
+        // تعطيل الأيام السابقة في الرزنامة فوراً
+        dateInput.setAttribute('min', todayString);
 
-        // معالجة إرسال النموذج
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            successAlert.style.display = 'none';
-            errorAlert.style.display = 'none';
+        // منع اللصق اليدوي لتاريخ قديم
+        dateInput.addEventListener('input', function() {
+            if (this.value && this.value < todayString) {
+                this.value = todayString;
+            }
+        });
+
+        // ==========================================
+        // 2. إعداد قاعدة بيانات Supabase
+        // ==========================================
+        // تنبيه: ضع الروابط الخاصة بك هنا، وإلا فلن تظهر الساعات!
+        const supabaseUrl = 'https://vruesnomrftsgfnrhedw.supabase.co';
+        const supabaseKey = 'sb_publishable_2_baJv89Ydrv0BzMgHB1YQ_EZHcB9jK';
+        
+        let supabaseClient;
+        try {
+            // استخدام المكتبة التي تم استدعاؤها في أعلى الصفحة
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        } catch (e) {
+            console.error("لم يتم العثور على روابط Supabase الصحيحة", e);
+            errorAlert.innerText = "يرجى وضع روابط Supabase الصحيحة في الكود لكي تعمل الصفحة.";
+            errorAlert.style.display = 'block';
+        }
+
+        const timeSlots = [
+            { display: '12:00 م', value: '12:00:00' }, { display: '1:00 م', value: '13:00:00' },
+            { display: '2:00 م', value: '14:00:00' }, { display: '3:00 م', value: '15:00:00' },
+            { display: '4:00 م', value: '16:00:00' }, { display: '5:00 م', value: '17:00:00' },
+            { display: '6:00 م', value: '18:00:00' }, { display: '7:00 م', value: '19:00:00' },
+            { display: '8:00 م', value: '20:00:00' }, { display: '9:00 م', value: '21:00:00' },
+            { display: '10:00 م', value: '22:00:00' }, { display: '11:00 م', value: '23:00:00' }
+        ];
+
+        // ==========================================
+        // 3. عرض الساعات عند تغيير التاريخ
+        // ==========================================
+        dateInput.addEventListener('change', async () => {
+            selectedTime = null;
             submitBtn.disabled = true;
-            submitBtn.innerText = 'جاري إرسال الطلب...';
-
-            // جلب القيم من المدخلات
-            const customerName = document.getElementById('customerName').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            const carType = document.getElementById('carType').value;
-            const bookingDate = dateInput.value;
+            timesGrid.innerHTML = '';
+            errorAlert.style.display = 'none';
+            document.getElementById('successAlert').style.display = 'none';
             
-            // جلب القيمة من القائمة المنسدلة وفصلها إلى (من) و (إلى)
-            const timeSlot = document.getElementById('timeSlot').value;
-            const [timeFrom, timeTo] = timeSlot.split('-'); // فصل النص من علامة (-)
+            const selectedDate = dateInput.value;
+            if (!selectedDate || selectedDate < todayString) {
+                timeSection.style.display = 'none';
+                return;
+            }
+
+            // إظهار قسم الوقت وعلامة التحميل
+            timeSection.style.display = 'block';
+            loadingTimes.style.display = 'block';
+
+            if (!supabaseClient) {
+                loadingTimes.style.display = 'none';
+                return; // إذا لم تكن الروابط صحيحة، أوقف العملية هنا
+            }
 
             try {
-                // إرسال البيانات إلى جدول bookings
-                const { error } = await supabase
-                    .from('bookings')
-                    .insert([
-                        { 
-                            customer_name: customerName, 
-                            phone_number: phoneNumber, 
-                            car_type: carType, 
-                            booking_date: bookingDate, 
-                            time_from: timeFrom, 
-                            time_to: timeTo 
-                        }
-                    ]);
+                // جلب الحجوزات
+                const { data: bookings, error: err1 } = await supabaseClient.from('bookings').select('booking_time').eq('booking_date', selectedDate);
+                if (err1) throw err1;
 
-                if (error) throw error;
+                // جلب الأوقات المغلقة
+                const { data: blocked, error: err2 } = await supabaseClient.from('blocked_slots').select('blocked_time').eq('blocked_date', selectedDate);
+                if (err2) throw err2;
 
-                // إظهار رسالة النجاح وتفريغ الحقول
-                successAlert.style.display = 'block';
-                form.reset();
-                dateInput.setAttribute('min', today);
+                const bookingCounts = {};
+                if (bookings) {
+                    bookings.forEach(b => {
+                        bookingCounts[b.booking_time] = (bookingCounts[b.booking_time] || 0) + 1;
+                    });
+                }
+                const blockedTimes = blocked ? blocked.map(b => b.blocked_time) : [];
 
-            } catch (error) {
-                console.error('Error inserting data:', error);
-                errorAlert.innerText = 'حدث خطأ أثناء إرسال طلبك. يرجى التحقق من الاتصال وإعادة المحاولة.';
+                timeSlots.forEach(slot => {
+                    const box = document.createElement('div');
+                    box.className = 'time-box';
+                    box.innerText = slot.display;
+
+                    if (blockedTimes.includes(slot.value) || (bookingCounts[slot.value] >= 2)) {
+                        box.classList.add('disabled');
+                        box.innerText += ' (غير متاح)';
+                    } else {
+                        box.addEventListener('click', () => {
+                            document.querySelectorAll('.time-box').forEach(b => b.classList.remove('selected'));
+                            box.classList.add('selected');
+                            selectedTime = slot.value;
+                            submitBtn.disabled = false;
+                        });
+                    }
+                    timesGrid.appendChild(box);
+                });
+            } catch (err) {
+                console.error(err);
+                errorAlert.innerText = "حدث خطأ أثناء جلب المواعيد. تأكد من إعدادات قاعدة البيانات وجدول blocked_slots.";
                 errorAlert.style.display = 'block';
+                timeSection.style.display = 'none';
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'تأكيد الحجز';
+                loadingTimes.style.display = 'none';
             }
+        });
+
+        // ==========================================
+        // 4. إرسال الفورم للحجز
+        // ==========================================
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!selectedTime || !supabaseClient) return;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'جاري الإرسال...';
+            
+            const payload = {
+                customer_name: document.getElementById('customerName').value,
+                phone_number: document.getElementById('phoneNumber').value,
+                car_type: document.getElementById('carType').value,
+                booking_date: dateInput.value,
+                booking_time: selectedTime
+            };
+
+            const { error } = await supabaseClient.from('bookings').insert([payload]);
+
+            if (error) {
+                errorAlert.innerText = 'حدث خطأ أثناء إرسال طلبك. يرجى المحاولة مرة أخرى.';
+                errorAlert.style.display = 'block';
+                submitBtn.disabled = false;
+            } else {
+                document.getElementById('successAlert').style.display = 'block';
+                document.getElementById('bookingForm').reset();
+                timeSection.style.display = 'none';
+                dateInput.setAttribute('min', todayString);
+            }
+            submitBtn.innerText = 'تأكيد الحجز';
         });
     </script>
 </body>
